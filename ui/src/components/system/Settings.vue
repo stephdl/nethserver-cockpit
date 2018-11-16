@@ -215,6 +215,49 @@
           </div>
         </div>
       </form>
+      <div v-if="view.isRoot" class="divider"></div>
+      <h3 v-if="view.isRoot">{{$t('settings.logrotate')}}</h3>
+      <form v-if="view.isRoot" class="form-horizontal" v-on:submit.prevent="saveLog(LogConfig)">
+        <div :class="['form-group', LogConfig.errors.Times.hasError ? 'has-error' : '']">
+          <label class="col-sm-2 control-label" for="textInput-modal-markup">{{$t('settings.log_times')}}</label>
+          <div class="col-sm-5">
+            <input required type="number" v-model="LogConfig.Times" class="form-control">
+            <span v-if="LogConfig.errors.Times.hasError" class="help-block">{{$t('validation.validation_failed')}}: {{$t('validation.'+LogConfig.errors.Times.message)}}</span>
+          </div>
+        </div>
+
+          <div :class="['form-group', LogConfig.errors.Rotate.hasError ? 'has-error' : '']">
+            <label class="col-sm-2 control-label" for="textInput-modal-markup">{{$t('settings.log_rotate')}}</label>
+            <div class="col-sm-5">
+              <select required type="text" v-model="LogConfig.Rotate" class="combobox form-control">
+                            <option value="daily">{{$t('settings.rotation_daily')}}</option>
+                            <option value="weekly">{{$t('settings.rotation_weekly')}}</option>
+                            <option value="monthly">{{$t('settings.rotation_monthly')}}</option>
+              </select>
+              <span v-if="LogConfig.errors.Rotate.hasError" class="help-block">{{$t('validation.validation_failed')}}: {{$t('validation.'+LogConfig.errors.Rotate.message)}}</span>
+            </div>
+          </div>
+
+          <div :class="['form-group', LogConfig.errors.Compression.hasError ? 'has-error' : '']">
+            <label class="col-sm-2 control-label" for="textInput-modal-markup">{{$t('settings.log_compression')}}</label>
+            <div class="col-sm-5">
+              <input type="checkbox" :value="LogConfig.Compression == 'enabled'" v-model="LogConfig.Compression"
+                class="form-control">
+              <span v-if="LogConfig.errors.Compression.hasError" class="help-block">{{$t('validation.validation_failed')}}: {{$t('validation.'+LogConfig.errors.Compression.message)}}</span>
+            </div>
+          </div>
+
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="textInput-modal-markup">
+            <div v-if="loaders.hints" class="spinner spinner-sm form-spinner-loader adjust-top-loader"></div>
+          </label>
+          <div class="col-sm-5">
+            <button class="btn btn-primary" type="submit">{{$t('save')}}</button>
+          </div>
+        </div>
+      </form>
+
 
     </div>
   </div>
@@ -254,6 +297,7 @@ export default {
   mounted() {
     this.getSettings();
     this.getHints();
+    this.getLogRotate();
   },
   data() {
     return {
@@ -262,6 +306,25 @@ export default {
         isRoot: false
       },
       hints: {},
+      LogConfig: {
+        Times: 4,
+        Rotate: 'weeckly',
+        Compression: 'disabled',
+        errors: {
+            Times:{
+                hasError: false,
+                message: ""
+            },
+            Compression:{
+                hasError: false,
+                message: ""
+            },
+            Rotate:{
+                hasError: false,
+                message: ""
+            }
+        },
+      },
       settings: {
         smarthost: {
           SmartHostStatus: false,
@@ -564,6 +627,89 @@ export default {
           }
         },
         false
+      );
+    },
+    getLogRotate() {
+      var context = this;
+      context.exec(
+        ["system-logrotate/read"],
+        null,
+        null,
+        function(success) {
+          success = JSON.parse(success);
+          context.view.isLoaded = true;
+          context.LogConfig.Times = success.configuration.props.Times;
+          context.LogConfig.Compression =
+          success.configuration.props.Compression == "enabled";
+          context.LogConfig.Rotate = success.configuration.props.Rotate;
+        },
+        function(error) {
+          console.error(error);
+        }
+      );
+    },
+    saveLog(obj) {
+      var context = this;
+
+      var LogObj = {
+        name: "logrotate",
+        props: {
+            Times: obj.Times,
+            Compression: obj.Compression ? "enabled" : "disabled",
+            Rotate: obj.Rotate
+        },
+        type: "configuration"
+      };
+
+      context.LogConfig.isLoading = true;
+      context.LogConfig.errors.Times.hasError = false;
+      context.LogConfig.errors.Compression.hasError = false;
+      context.LogConfig.errors.Rotate.hasError = false;
+
+      context.exec(
+        ["system-logrotate/validate"],
+        LogObj,
+        null,
+        function(success) {
+          context.LogConfig.isLoading = false;
+
+          // update values
+          context.exec(
+            ["system-logrotate/update"],
+            LogObj,
+            function(stream) {
+              console.info("logrotate", stream);
+            },
+            function(success) {
+              // notification
+              context.$parent.notifications.success.message = context.$i18n.t(
+                "settings.logrotate_edit_ok"
+              );
+
+              // get logrotate
+              context.getLogRotate();
+            },
+            function(error, data) {
+              // notification
+              context.$parent.notifications.error.message = context.$i18n.t(
+                "settings.logrotate_edit_error"
+              );
+            }
+          );
+        },
+        function(error, data) {
+          var errorData = JSON.parse(data);
+          context.LogConfig.isLoading = false;
+          context.LogConfig.errors.Times.hasError = false;
+          context.LogConfig.errors.Compression.hasError = false;
+          context.LogConfig.errors.Rotate.hasError = false;
+
+          for (var e in errorData.attributes) {
+            var attr = errorData.attributes[e];
+            context.LogConfig.errors[attr.parameter].hasError = true;
+            context.LogConfig.errors[attr.parameter].message = attr.error;
+          }
+        }
       );
     }
   }
