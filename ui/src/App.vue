@@ -325,7 +325,8 @@ export default {
           }
           context.auths = success.system || [];
           context.applications = success.applications || [];
-            context.isRoot = success.status.isRoot == 1;
+          context.isRoot = success.status.isRoot == 1;
+
             if (context.isRoot) {
                 $('#sidebar-menu', window.parent.document).show();
                 $('#sidebar-tools', window.parent.document).show();
