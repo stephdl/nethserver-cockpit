@@ -335,7 +335,8 @@ export default {
             var liElement = ['0','1','2','3'];
             
                 if (context.applications.length > 0) { 
-                    liElement.splice(1, 1);
+//                    liElement.splice(1, 1);
+                    delete liElement[1];
                 }
             $('#sidebar-menu', window.parent.document).show();
             for (var i in liElement) {
