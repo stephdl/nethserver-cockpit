@@ -193,7 +193,9 @@ export default {
 
     // get authorization for routes
     this.getAuths();
-
+        $("#sidebar-menu").css("display", "none");
+//$("#sidebar-menu").show();
+//$('#sidebar-menu', window.parent.document).children(0).show();
     // check for running tasks
     this.checkSystemTaks();
 
@@ -322,12 +324,69 @@ export default {
             console.error(e);
           }
           context.auths = success.system || [];
+          context.applications = success.applications || [];
+            context.isRoot = success.status.isRoot == 1;
+            if (context.isRoot) {
+                $('#sidebar-menu', window.parent.document).show();
+                $('#sidebar-tools', window.parent.document).show();
+//                $('#sidebar-menu', window.parent.document).children().show();
+            }
+            else {
+            var liElement = ['0','1','2','3'];
+            
+                if (context.applications.length > 0) { 
+                    liElement.splice(1, 1);
+                }
+            $('#sidebar-menu', window.parent.document).show();
+            for (var i in liElement) {
+                $('#sidebar-menu', window.parent.document).children().eq(i).hide();
+//            $('#sidebar-menu', window.parent.document).children().eq(1).hide();
+                
+            }
+            }
+            //            $('#sidebar-menu', window.parent.document).children().second().hide();
+//            $('#sidebar-menu', window.parent.document).children().first().show();
+
+ //           window.parent.document.getElementById("sidebar-menu").children[1].style.display = ""
+        //$('#applications').show();
+        //$('#terminal').show();
+//document.getElementById(sidebar-menu).style.visibility = "visible";
+//document.getElementById(sidebar-tools).style.visibility = "visible";
+//document.getElementById("sidebar-menu").style.display = "block";
+//document.getElementById("sidebar-tools").style.display = "block";
+//$('#sidebar-menu', window.parent.document).children(2).show();
+//$('#sidebar-menu').children(2).show();
+//$("#sidebar-menu").css("display", "");
+//$("#sidebar-tools").css("display", "");
         },
         function(error) {
           console.error(error);
         },
         false
       );
+
+//        $('#sidebar-menu', window.parent.document).show();
+//$('#sidebar-menu', window.parent.document).children().first().show();
+//  $('li.list-group-item.active', window.parent.document).show();      
+//  $('#sidebar-menu', window.parent.document).show();
+//  $('#sidebar-tools', window.parent.document).show();
+        //        $("#sidebar-menu").css("display", "none");
+//$("#sidebar-menu").css("display", "");
+//$("#sidebar-tools").css("display", "");
+//document.getElementById("sidebar-menu").style.display = "block";
+//document.getElementById("sidebar-tools").style.display = "block";
+//document.getElementById(sidebar-menu).style.visibility = "visible";
+//document.getElementById(sidebar-menu).style.display = "visible";
+//document.getElementById(sidebar-tools).style.visibility = "visible";
+//document.getElementById(sidebar-tools).style.display = "visible";
+
+//$('#sidebar-menu', window.parent.document).children(2).show();
+        //$('#sidebar-menu').show();
+//$('#sidebar-tools').show();
+//        (parent.document.getElementById("sidebar-menu").children[0]).show();
+//        (parent.document.getElementById("sidebar-menu").children[1]).show();
+//$('#sidebar-menu', window.parent.document).children(2).show();
+//$('#sidebar-menu').children(2).show();
     },
     checkAuth(route) {
       return this.auths.indexOf(route) != -1;
