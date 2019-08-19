@@ -31,7 +31,7 @@
             foreach my $role (@roles) {
                 if ($role =~ /^nethserver-/) {
                     $role =~ s/-/_/g;
-                    push @applications, uc "APP_$role";
+                    push @applications, uc "NSAPI_$role";
                 } else {
                    $role =~ s/-/_/g;
                    push @systems, 'NSAPI_SYSTEM_'. uc $role;
