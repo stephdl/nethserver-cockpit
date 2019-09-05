@@ -23,6 +23,13 @@
     <div v-for="i in ranges" v-bind:key="i.name">
       <div class="row">
         <h4 class="dhcp-int col-sm-2">{{i.name}} <span v-if="i.nslabel" class="gray">{{i.nslabel? ' - '+i.nslabel : ''}}</span></h4>
+        <button
+          @click="scanNetwork(i.name)"
+          class="btn btn-primary span-right-margin-lg dhcp-mod-btn"
+          data-action="restart"
+          data-container="body"
+        >{{$t('dhcp.scan_network')}}</button>
+        
         <toggle-button
           class="min-toggle"
           :width="40"
@@ -41,6 +48,7 @@
           v-if="i.props.DhcpRangeStart && i.props.DhcpRangeStart.length > 0 && i.props.DhcpRangeEnd && i.props.DhcpRangeEnd.length > 0"
           class="gray margin-left-md"
         >({{i.props.DhcpRangeStart}} - {{i.props.DhcpRangeEnd}})</span>
+
       </div>
     </div>
 
@@ -226,6 +234,171 @@
               <button class="btn btn-primary" type="submit">{{$t('save')}}</button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="modal" id="scanNetworkModal" tabindex="-1" role="dialog" data-backdrop="static">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">
+              {{$t('dhcp.Scanned_Network') + ' : '+ nic}}
+            </h4>
+            <div v-if="view.isScanning" class="spinner spinner-lg"></div>
+          </div>
+          <!-- <form class="form-horizontal" v-on:submit.prevent="saveReservation(newReservation)"> -->
+          <!-- <form class="form-horizontal"> -->
+            
+            <div class="modal-body">
+              <!-- <div :class="['form-group', newReservation.errors.name.hasError ? 'has-error' : '']">
+                <label
+                  class="col-sm-3 control-label"
+                  for="textInput-modal-markup"
+                >{{$t('dhcp.hostname')}}</label>
+                <div class="col-sm-9">
+                  <input
+                    :disabled="newReservation.isEdit"
+                    required
+                    type="text"
+                    v-model="newReservation.name"
+                    class="form-control"
+                  >
+                  <span
+                    v-if="newReservation.errors.name.hasError"
+                    class="help-block"
+                  >{{$t('validation.validation_failed')}}: {{$t('validation.'+newReservation.errors.name.message)}}</span>
+                </div>
+              </div>
+              <div
+                :class="['form-group', newReservation.errors.IpAddress.hasError ? 'has-error' : '']"
+              >
+                <label
+                  class="col-sm-3 control-label"
+                  for="textInput-modal-markup"
+                >{{$t('dhcp.ip_address')}}</label>
+                <div class="col-sm-9">
+                  <input
+                    required
+                    type="text"
+                    v-model="newReservation.props.IpAddress"
+                    class="form-control"
+                  >
+                  <span
+                    v-if="newReservation.errors.IpAddress.hasError"
+                    class="help-block"
+                  >{{$t('validation.validation_failed')}}: {{$t('validation.'+newReservation.errors.IpAddress.message)}}</span>
+                </div>
+              </div>
+              <div
+                :class="['form-group', newReservation.errors.MacAddress.hasError ? 'has-error' : '']"
+              >
+                <label
+                  class="col-sm-3 control-label"
+                  for="textInput-modal-markup"
+                >{{$t('dhcp.mac_address')}}</label>
+                <div class="col-sm-9">
+                  <input
+                    required
+                    type="text"
+                    v-model="newReservation.props.MacAddress"
+                    class="form-control"
+                  >
+                  <span
+                    v-if="newReservation.errors.MacAddress.hasError"
+                    class="help-block"
+                  >{{$t('validation.validation_failed')}}: {{$t('validation.'+newReservation.errors.MacAddress.message)}}</span>
+                </div>
+              </div>
+              <div
+                :class="['form-group', newReservation.errors.Description.hasError ? 'has-error' : '']"
+              >
+                <label
+                  class="col-sm-3 control-label"
+                  for="textInput-modal-markup"
+                >{{$t('dhcp.description')}}</label>
+                <div class="col-sm-9">
+                  <input
+                    type="text"
+                    v-model="newReservation.props.Description"
+                    class="form-control"
+                  >
+                  <span
+                    v-if="newReservation.errors.Description.hasError"
+                    class="help-block"
+                  >{{$t('validation.validation_failed')}}: {{$t('validation.'+newReservation.errors.Description.message)}}</span>
+                </div>
+              </div> -->
+              
+  <div class="list-group list-view-pf list-view-pf-view no-mg-top mg-top-10">
+    <div v-bind:key="i.ip" v-for="i in scan" class="list-group-item">
+      <!-- <div class="list-view-pf-actions"> -->
+      
+      
+        <!-- <button class="btn btn-default" v-on:click="$emit('item-edit', item)">
+          <span class="fa fa-pencil"></span>
+          {{ $t('proxypass.item_edit_button')}}
+        </button> -->
+        
+        <!-- <div class="dropup pull-right dropdown-kebab-pf">
+          <button
+            class="btn btn-link dropdown-toggle"
+            type="button"
+            v-bind:id="item.name + '-ddm'"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+            :disabled="item.name === 'default'"
+          >
+            <span class="fa fa-ellipsis-v"></span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-right" v-bind:aria-labelledby="item.name + '-ddm'">
+            <li>
+              <a href="#" v-on:click="$emit('item-delete', item)">
+                <span class="fa pficon-delete span-right-margin"></span>
+                {{ $t('proxypass.item_delete_button') }}
+              </a>
+            </li>
+          </ul>
+        </div> -->
+        
+      <!-- </div> -->
+
+      <div class="list-view-pf-main-info small-list">
+        <!-- <div class="list-view-pf-left">
+          <span class="list-view-pf-icon-sm pficon pficon-route"></span>
+        </div> -->
+        <div class="list-view-pf-body">
+          <div class="list-view-pf-description">
+            <div class="list-view-pf-additional-info rules-info"><strong>{{ i.ip }}</strong></div>
+            <div class="list-view-pf-additional-info rules-info">{{ i.mac }}</div>
+            <div class="list-view-pf-additional-info rules-info">{{ i.name }}</div>
+          </div>
+          <!-- <div class="list-view-pf-additional-info rules-info">
+            <div class="list-view-pf-additional-info-item" v-if="item.HTTP==='no'">
+              <span class="span-left-margin fa fa-check green"></span>
+              <strong>{{$t('proxypass.HttpdForced')}}</strong>
+            </div>
+          </div> -->
+        </div>
+      </div>
+    </div>
+    <!-- end item -->
+  </div>
+      <!-- end list -->
+
+              
+              
+              
+            </div>
+
+            <div class="modal-footer">
+              <!-- <div v-if="newReservation.isLoading" class="spinner spinner-sm form-spinner-loader"></div> -->
+              <button class="btn btn-default" type="button" data-dismiss="modal">{{$t('cancel')}}</button>
+              <!-- <button class="btn btn-primary" type="submit">{{$t('save')}}</button> -->
+            </div>
+          <!-- </form> -->
         </div>
       </div>
     </div>
@@ -526,7 +699,8 @@ export default {
     return {
       view: {
         isLoaded: false,
-        isAuth: false
+        isAuth: false,
+        isScanning: true
       },
       tableLangsTexts: this.tableLangs(),
       columns: [
@@ -565,6 +739,7 @@ export default {
           sortable: false
         }
       ],
+      scan: [],
       rows: [],
       ranges: [],
       currentRange: this.initRange(),
@@ -983,6 +1158,42 @@ export default {
     newIPReservation() {
       this.newReservation = this.initReservation();
       $("#newReservationModal").modal("show");
+    },
+    scanNetwork(nic) {
+      this.doScan(nic);
+      $("#scanNetworkModal").modal("show");
+    },
+    doScan(nic) {
+      var context = this;
+      context.view.isScanning = true;
+      context.scan = [];
+      context.nic = nic;
+      context.exec(
+        ["system-dhcp/scanNetwork"],
+        {
+          nic: nic
+        },
+        null,
+        function(success) {
+          try {
+            success = JSON.parse(success);
+          } catch (e) {
+            console.error(e);
+          }
+          context.view.isScanning = false;
+          // context.scan = success.configuration.range;
+          context.scan = success;
+
+          // for (var i in context.ranges) {
+          //   context.ranges[i].props.status =
+          //     context.ranges[i].props.status == "disabled" ? false : true;
+          // }
+        },
+        function(error) {
+          console.error(error);
+          context.view.isScanning = false;
+        }
+      );
     },
     editReservation(ipres) {
       this.newReservation.name = ipres.name;
